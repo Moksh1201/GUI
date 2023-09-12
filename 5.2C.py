@@ -8,9 +8,9 @@ import RPi.GPIO as GPIO # Module for GPIO pin numbering
 GPIO.setmode(GPIO.BCM)
 
 # Create LED objects 
-red_led = LED(18) 
-blue_led = LED(24)
-green_led = LED(23)
+red_led = LED(17) 
+blue_led = LED(22)
+green_led = LED(24)
 
 # Create main window
 main_window = Tk()  
