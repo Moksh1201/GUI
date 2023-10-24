@@ -1,46 +1,35 @@
-# Import necessary libraries
-import smbus  # Library for I2C communication
-import time   # Library for time-related functions
+import tkinter as tk
+from smbus import SMBus
 
-# Define constants for I2C configuration
-I2C_BUS = 1              # I2C bus number (1 for Raspberry Pi)
-BH1750_ADDR = 0x23       # I2C address of the BH1750 sensor
+addr = 0x60                 # Defining the I2C address of the LED control device
 
-# Create an I2C bus object
-bus = smbus.SMBus(I2C_BUS)
+bus = SMBus(1)              # Initializing the I2C bus
 
-# Turn on the sensor by sending a command
-bus.write_byte(BH1750_ADDR, 0x01)  # 0x01 is the command to power on the sensor
-time.sleep(0.2)                   # Wait for the sensor to initialize
+# Function to turn on the LED
+def turn_on_led():
+    bus.write_byte(addr, 0x1)  # Send '1' to turn on the LED
+    status_label.config(text="LED turned on")  # Update status label
 
-try:
-    while True:
-        # Read data from the sensor
-        data = bus.read_i2c_block_data(BH1750_ADDR, 0x20)  # Read 2 bytes of data
-        lux = (data[1] + (256 * data[0])) / 1.2  # Calculate light intensity in lux
+# Function to turn off the LED
+def turn_off_led():
+    bus.write_byte(addr, 0x0)  # Send '0' to turn off the LED
+    status_label.config(text="LED turned off")  # Update status label
 
-        # Categorize the light level
-        if lux > 10000:
-            light_level = "Too Bright"
-        elif lux > 1000:
-            light_level = "Bright"
-        elif lux > 100:
-            light_level = "Medium"
-        elif lux > 10:
-            light_level = "Dark"
-        else:
-            light_level = "Too Dark"
+# Creating a tkinter window
+app = tk.Tk()
+app.title("LED Control")
 
-        # Print the light intensity and category
-        print(f"Light Intensity: {lux} lux ({light_level})")
+# Creating buttons to turn the LED on and off
+on_button = tk.Button(app, text="LED ON", command=turn_on_led, bg="green")
+off_button = tk.Button(app, text="LED OFF", command=turn_off_led, bg="red")
 
-        time.sleep(1)  # Wait for 1 second before the next reading
+# Creating a label to display the status
+status_label = tk.Label(app, text="Status: ")
 
-except KeyboardInterrupt:
-    # Handle Ctrl+C to exit the program gracefully
-    print("KeyboardInterrupt")
+# Pack the buttons and status label in the window
+on_button.pack()
+off_button.pack()
+status_label.pack()
 
-finally:
-    # Turn off the sensor by sending the power-off command
-    bus.write_byte(BH1750_ADDR, 0x00)  # 0x00 is the command to power off the sensor
-
+# Starting the main loop
+app.mainloop()
